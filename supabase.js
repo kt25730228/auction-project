@@ -1,6 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabaseUrl = window.env.SUPABASE_URL;
+const supabaseAnonKey = window.env.SUPABASE_ANON;
 
-export const supabase = createClient(
-  import.meta.env.NEXT_PUBLIC_SUPABASE_URL,
-  import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);

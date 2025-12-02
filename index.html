@@ -1155,7 +1155,143 @@ if(!localStorage.getItem('w_products') || load().length===0){
 autoLogin(); 
 loadSession();
 render();
+// ===== 상품 등록 화면 =====
+function createView() {
+    const wrap = el('div');
+    wrap.innerHTML = `
+        <h2 class="text-3xl font-bold text-sky-600 mb-8 text-center">상품 등록</h2>
 
+        <div class="space-y-6 bg-white p-8 rounded-2xl shadow">
+
+            <!-- 상품 제목 -->
+            <input id="c_title" class="w-full border rounded-lg p-4" placeholder="상품 제목">
+
+            <!-- 상품 설명 -->
+            <textarea id="c_desc" class="w-full border rounded-lg p-4 h-32" placeholder="상품 설명을 자세히 적어주세요"></textarea>
+
+            <!-- 주의 안내 -->
+            <div class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg text-sm">
+                🔔 가격/경매 유형/종료일 변경 제한 안내<br>
+                <span class="text-gray-600">모든 항목 수정 가능합니다</span>
+            </div>
+
+            <!-- 경매 유형 & 시작가 -->
+            <div class="grid grid-cols-2 gap-4">
+                <select id="c_type" class="border rounded-lg p-3">
+                    <option value="general">일반 경매</option>
+                    <option value="event">이벤트 경매</option>
+                </select>
+
+                <input id="c_start" type="number" class="border rounded-lg p-3" placeholder="시작가 (최소 입찰 금액)">
+            </div>
+
+            <!-- 종료 일시 -->
+            <div>
+                <label class="text-sm text-gray-600">경매 종료 일시 *</label>
+                <input id="c_end" type="datetime-local" class="w-full border rounded-lg p-3 mt-1">
+            </div>
+
+            <!-- 이벤트 경매 한정 영역 -->
+            <div id="c_eventBox" class="hidden bg-yellow-50 border border-yellow-200 p-4 rounded-lg space-y-4">
+
+                <h3 class="font-bold text-gray-700">이벤트 낙찰 범위 설정</h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="c_eventStart" type="number" class="border rounded-lg p-3" placeholder="최소 낙찰 예상가">
+                    <input id="c_eventEnd" type="number" class="border rounded-lg p-3" placeholder="최대 낙찰 예상가">
+                </div>
+
+                <p class="text-gray-600 text-sm">
+                    입찰자는 (시작가와 종료가) 사이의 금액만 입력할 수 있습니다.<br>
+                    당첨 금액은 범위 안에서 추첨됩니다.
+                </p>
+            </div>
+
+            <!-- 즉시구매 -->
+            <input id="c_buy" type="number" class="w-full border rounded-lg p-3" placeholder="즉시구매가 (선택)">
+
+            <!-- 이미지 업로드 -->
+            <div>
+                <label class="text-sm text-gray-600">상품 사진 (최대 3장)</label>
+                <input id="c_imgs" type="file" multiple class="w-full border rounded-lg p-3 mt-1">
+            </div>
+
+            <!-- 등록 버튼 -->
+            <button id="c_submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold p-4 rounded-lg">
+                상품 등록하기
+            </button>
+
+        </div>
+    `;
+
+    root.appendChild(wrap);
+
+    // ===== 이벤트 경매 선택 시 영역 표시 =====
+    const typeSel = document.getElementById('c_type');
+    typeSel.addEventListener('change', () => {
+        document.getElementById('c_eventBox').classList.toggle(
+            'hidden', 
+            typeSel.value !== 'event'
+        );
+    });
+
+    // ===== 상품 등록 처리 =====
+    document.getElementById('c_submit').onclick = async () => {
+        const title = document.getElementById('c_title').value.trim();
+        const desc = document.getElementById('c_desc').value.trim();
+        const type = document.getElementById('c_type').value;
+        const startPrice = Number(document.getElementById('c_start').value);
+        const endDate = document.getElementById('c_end').value;
+        const buyNow = Number(document.getElementById('c_buy').value) || null;
+
+        let eventRangeStart = null;
+        let eventRangeEnd = null;
+
+        if (type === 'event') {
+            eventRangeStart = Number(document.getElementById('c_eventStart').value);
+            eventRangeEnd = Number(document.getElementById('c_eventEnd').value);
+
+            if (!eventRangeStart || !eventRangeEnd)
+                return toast("이벤트 경매는 낙찰 범위를 입력해야 합니다.");
+
+            if (eventRangeStart >= eventRangeEnd)
+                return toast("최소/최대 범위를 올바르게 입력해주세요.");
+        }
+
+        if (!title) return toast("제목을 입력해주세요.");
+        if (!startPrice) return toast("시작가를 입력해주세요.");
+        if (!endDate) return toast("종료일시를 선택해주세요.");
+
+        // 이미지 처리
+        const files = document.getElementById('c_imgs').files;
+        const images = files.length > 0 ? await uploadImg(files) : [];
+
+        // 실제 상품 생성
+        state.products.push({
+            id: Date.now(),
+            title,
+            description: desc,
+            type,
+            startingPrice: startPrice,
+            buyNow,
+            eventRangeStart,
+            eventRangeEnd,
+            images,
+            endDate: new Date(endDate).toISOString(),
+            creator: state.session.email,
+            bids: [],
+            sold: false,
+            winningPrice: null
+        });
+
+        save();
+        toast("상품이 등록되었습니다!");
+        state.view = "mySales";
+        render();
+    };
+}
+
+  
 <script type="module">
   // api.js 모듈에서 필요한 함수들을 import 합니다.
   // 이 import 구문이 api.js를 로드하고, api.js는 다시 supabase.js를 로드합니다.
@@ -1184,3 +1320,4 @@ render();
 
 </body>
 </html>
+

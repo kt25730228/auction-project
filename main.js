@@ -404,8 +404,7 @@ function loginView() {
     const user = loadUsers().find(u=>u.email===email && u.password===pw);
     if(!user) return toast('이메일 또는 비밀번호가 틀립니다');
     saveSession({email:user.email, name:user.name});
-    state.view='list'; render();
-  }});
+    state.view='list'; render();}});
   form.innerHTML = `<input class="w-full border rounded px-4 py-2 mb-4" placeholder="이메일" required>
     <input type="password" class="w-full border rounded px-4 py-2 mb-6" placeholder="비밀번호" required>
     <button class="w-full bg-sky-500 text-white py-3 rounded font-bold">로그인</button>`;
@@ -479,8 +478,7 @@ function createView(product=null) {
           p.images = imgs.length ? imgs : p.images;
           save();
           toast('상품 수정 완료!');
-          state.view='detail'; state.detail=p; render();
-        });
+          state.view='detail'; state.detail=p; render();});
       } else {
         save();
         toast('상품 수정 완료!');
@@ -946,7 +944,7 @@ function mySalesView() {
             const actions = el('div',{class:'flex gap-2 justify-end'});
             actions.appendChild(el('button',{
                 class:'text-blue-500 text-sm hover:underline', 
-                onclick: (e) => { e.stopPropagation(); state.detail=p; state.view='edit'; render(); } 
+                onclick: (e) => { e.stopPropagation(); state.detail=p; state.view='edit'; render();} 
             }, '수정'));
 
             if (!isBidding) {
@@ -1102,5 +1100,3 @@ if(!localStorage.getItem('w_products') || load().length===0){
 autoLogin(); 
 loadSession();
 render();
-
-

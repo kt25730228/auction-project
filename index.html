@@ -1155,12 +1155,32 @@ if(!localStorage.getItem('w_products') || load().length===0){
 autoLogin(); 
 loadSession();
 render();
+
+<script type="module">
+  // api.js 모듈에서 필요한 함수들을 import 합니다.
+  // 이 import 구문이 api.js를 로드하고, api.js는 다시 supabase.js를 로드합니다.
+  import * as api from './api.js'; 
+  // 또는 import { signup, login, loadProducts } from './api.js'; 
+
+  // ----------------------------------------------------
+  // 👇 여기부터 기존 index.html에 있던 전체 자바스크립트 로직을 유지합니다.
+  // (state, render, load, save, view 함수들...)
+  
+  // 예시: 이제 API 함수를 사용할 수 있습니다.
+  // async function loginView() {
+  //   // ...
+  //   try {
+  //     const user = await api.login(email, password); // api.js의 login 사용
+  //     // ...
+  //   } catch (error) {
+  //     // ...
+  //   }
+  // }
+  
+  // ... 모든 경매 관련 로직 ...
+
 </script>
-<script src="./env.js"></script>
-<script type="module" src="supabase.js"></script>
-<script type="module" src="api.js"></script>
 
 
 </body>
-
 </html>
